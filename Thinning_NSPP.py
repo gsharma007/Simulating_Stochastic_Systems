@@ -1,10 +1,3 @@
-# -*- coding: utf-8 -*-
-"""
-Created on Wed Nov 21 19:16:54 2018
-
-@author: kkeezhna
-"""
-
 waiting_avg = []
 prob = []
 n = 400
