@@ -1,10 +1,3 @@
-# -*- coding: utf-8 -*-
-"""
-Created on Sat Nov 24 21:25:24 2018
-
-@author: Kaushik
-"""
-
 waiting_avg = []
 prob = []
 Queue_level_avg = []
