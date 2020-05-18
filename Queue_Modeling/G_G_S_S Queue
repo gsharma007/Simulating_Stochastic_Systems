@@ -2,7 +2,7 @@ import pandas as pd
 import numpy as np
 
 Inter_Arrivals = [5, 8, 30, 20, 60, 80, 70, 30, 20, 90, 50]
-arrival_times = [np.sum(Arrivals[:n]) for n in range(1, len(Inter_Arrivals)+1)]
+arrival_times = [np.sum(Inter_Arrivals[:n]) for n in range(1, len(Inter_Arrivals)+1)]
 
 setup_time = [5, 6, 8, 6, 7, 8, 7, 5, 6, 8, 7]
 len(setup_time)
@@ -20,34 +20,67 @@ num_in_service = 0
 Event_Num = 0
 Event_calendar = []
 
+i = 0
 
-for i in range(len(arrival_times)):
-    if (arrival_times[i] >= min(depart_time) and arrival_times[i] >= min(setup_depart):
+#for i in range(len(arrival_times)):
+while (i < len(arrival_times)):
+    
+    print("Starting_i :", i)
+    
+    print("arrival_times:", arrival_times[i])
+    print("min_setup_depart:", min(setup_depart))
+    print("min_depart_time:", min(depart_time))
+    
+    if (arrival_times[i] >= min(setup_depart) and arrival_times[i] >= min(depart_time)):
         
         
         if queue_level != 0:
+            
+            print("Entering Case 1a")
+            
+            print("queue_level :", queue_level)
         
             i = i - queue_level
             
+            print("Downgraded i:", i)
+            
             clock = min(depart_time)
+            
+            print("Clock_time :", clock)
             
             setup_depart_1 = clock + setup_time[i]
             
-            depart_time_1 = setup_depart + service_time[i]
+            print("setup_depart_1 :", setup_depart_1)
+            
+            depart_time_1 = setup_depart_1 + service_time[i]
+            
+            print("depart_time_1 :", depart_time_1)
         
             for j in range(len(operator_av)):
                 if operator_av[j] == 1:
                     operator_av[j] = 0
                     setup_depart[j] = setup_depart_1
                     break
+                
+            print("Operator_av_array_1:", operator_av)
             
-            for i in range(len(setup_depart)):
-                if setup_depart[i] <= arrival_times[i+1]:
-                    operator_av[i] = 1
+            operator_av_count = operator_av.count(1)
+            print("operators available:", operator_av_count)
+            
+            print("set_up_depart_array:", setup_depart)
+            
+            
+            for o in range(len(setup_depart)):
+                if  setup_depart[o] <= arrival_times[i+1] or setup_depart[o] <= min(depart_time) :
+                    operator_av[o] = 1
+           
+            print("Operator_av_array_2:", operator_av)
         
+            index_mac_out = np.argmin(depart_time)
+        
+            machine_av[index_mac_out] = 1
             
-            operator_av = operator_av.count(1)
-            print("operators available =", operator_av)
+            print("Machine_av_array_1", machine_av)
         
         
             for j in range(len(machine_av)):
@@ -55,32 +88,49 @@ for i in range(len(arrival_times)):
                     machine_av[j] = 0
                     depart_time[j] = depart_time_1
                     break
+                
+            print("Machine_av_array_2:", machine_av)
 
-            machine_av = machine_av.count(1)
-            print("machines available =", machine_av)
+            machine_av_count = machine_av.count(1)
+            print("machines available:", machine_av_count)
+            
+            print("depart_time_array:", depart_time)
 
-            for i in range(len(depart_time)):
-                if depart_time[i] <= arrival_times[i+1]:
-                    machine_av[i] = 1
+            for m in range(len(depart_time)):
+                if depart_time[m] <= arrival_times[i+1]:
+                    machine_av[m] = 1
+                    
+            print("Machine_av_array_3:", machine_av)
         
             #Event_Num += 1
 
             #Event_list = {"Event_Number" : Event_Num, "Event_time" : clock, "Event_Type" : Arrival}
             #Event_calendar.append(Event_list)
         
-            queue_level -= 1
-        
-        
             i = i + queue_level
+            
+            print("upgraded_i :", i)
+            
+            queue_level -= 1
+            
+            print("updated_queue_level", queue_level)
         
         
         else:
+            
+            print("Entering Case 1b")
         
             clock = arrival_times[i]
+            
+            print("Clock_time :", clock)
         
             setup_depart_1 = clock + setup_time[i]
+            
+            print("setup_depart_1 :", setup_depart_1)
 
-            depart_time_1 = setup_depart + service_time[i]
+            depart_time_1 = setup_depart_1 + service_time[i]
+            
+            print("depart_time_1 :", depart_time_1)
 
             num_in_service += 1
 
@@ -90,34 +140,56 @@ for i in range(len(arrival_times)):
                     operator_av[j] = 0
                     setup_depart[j] = setup_depart_1
                     break
+            
+            print("Operator_av_array_1:", operator_av)
+                
+            operator_av_count = operator_av.count(1)
+            print("operators available:", operator_av_count)
+            
+            print("set_up_depart_array:", setup_depart)
 
-            for i in range(len(setup_depart)):
-                if setup_depart[i] <= arrival_times[i+1]:
-                    operator_av[i] = 1 
-
-            operator_av = operator_av.count(1)
-            print("operators available =", operator_av)
+            for o in range(len(setup_depart)):
+                if setup_depart[o] <= arrival_times[i+1]:
+                    operator_av[o] = 1
+                    
+            print("Operator_av_array_2:", operator_av)
 
             for j in range(len(machine_av)):
                 if machine_av[j] == 1:
                     machine_av[j] = 0
                     depart_time[j] = depart_time_1
                     break
+            
+            print("Machine_av_array_1:", machine_av)
+            
+            machine_av_count = machine_av.count(1)
+            print("machines available:", machine_av_count)
+            
+            print("depart_time_array:", depart_time)
 
-            machine_av = machine_av.count(1)
-            print("machines available =", machine_av)
-
-            for i in range(len(depart_time)):
-                if depart_time[i] <= arrival_times[i+1]:
-                    machine_av[i] = 1 
+            for m in range(len(depart_time)):
+                if depart_time[m] <= arrival_times[i+1]:
+                    machine_av[m] = 1 
+                    
+            print("Machine_av_array_2:", machine_av)
 
             #Event_Num += 1
 
             #Event_list = {"Event_Number" : Event_Num, "Event_time" : clock, "Event_Type" : Arrival}
             #Event_calendar.append(Event_list)
+            
+            i = i + 1
         
     else:
         
+        print("Entering Case 2")
+        
         queue_level += 1
         
+        print("Queue_Level :", queue_level)
+        
         clock = arrival_times[i]
+        
+        print("Clock_time :", clock)
+        
+        i = i + 1
