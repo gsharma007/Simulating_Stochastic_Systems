@@ -5,7 +5,7 @@ import bisect
 NUM_PATIENTS = 10
 np.random.seed(0)
 
-setup_time = [25, 26, 28, 26, 27, 28, 27, 15, 16, 18, 17]
+setup_time = np.random.randint(17, 26, size=NUM_PATIENTS)
 
 Inter_Arrivals = np.random.randint(20, 50, size=NUM_PATIENTS)
 arrival_times = [np.sum(Inter_Arrivals[:n]) for n in range(1, len(Inter_Arrivals)+1)]
