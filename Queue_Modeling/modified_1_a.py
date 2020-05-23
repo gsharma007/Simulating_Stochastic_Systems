@@ -70,5 +70,8 @@ while(clock<1000):
     
 print("Full_Event_Calendar:\n" , Event_calendar)
 
-pd["Arrival_times"] = arrival_times
-pd = pd.DataFrame(Event_calendar)
+df = pd.DataFrame(Event_calendar)
+df.insert(1, 'arrival_times', arrival_times)
+df.insert(4, 'setup_times', setup_time)
+df.insert(6, 'service_time', service_time)
+df["waiting_time"]= df["Event_time"]-df["arrival_times"]
