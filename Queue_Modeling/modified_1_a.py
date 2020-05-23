@@ -38,120 +38,46 @@ departures = []
 service_queue = []
 
 def handle_arrival_event():
-    
-    # print("min_depart_time:", min(depart_time))
-    # print("min_setup_depart:", min(setup_depart))
-    # print("Entering_1")
-    print("clock_now:", clock)
-    
     index = arrival_times.index(clock)
-    #print("index_value:", index)
-    
     if(clock >=min(depart_time) and clock >= min(setup_depart)  and len(service_queue)==0):
-        
-        #setup_time = np.random.randint(25,38)
-        #setup_times.append(setup_time)
-        
-        print("Entering_1A")
         setup_index = setup_depart.index(min(setup_depart))
-        print("setup_index:", setup_index)
         depart_index = depart_time.index(min(depart_time))
-        print("depart_index:",depart_index)
         setup_depart[setup_index] = clock + setup_time[index]
         depart_time[depart_index] =  setup_depart[setup_index] + service_time[index]
-        print("This is setup_depart time:",setup_depart)
-        print("This is depart Time:",depart_time)
-        
         Event_info = {"Patient": "P"+str(index), "Event_time" : clock, 
                       "Event_Type" : "Arrival and Service Start", 
                       "Setup_finish" : setup_depart[setup_index],
                       "Departure" : depart_time[depart_index]}
-        print("Event_info\n:", Event_info)
         Event_calendar.append(Event_info)
-        
-        #departures.append(depart_time)
-        
-        # U = np.random.uniform(0,1)
-        # print("U_value", U)
-        # if U > 0.5:
-        #     print("sample passes and depart time as it is")
-        # else:
-        #     bisect.insort(arrival_times, depart_time[depart_index])
-            
-        
     else:
-        print("Entering_1B")
         service_queue.append(index)
-        print("Service_Queue:", service_queue)
         queue_level = len(service_queue)
-        print("queue_level:", queue_level)
-        
         Event_info = {"Patient": "P"+str(index), "Event_time" : clock, 
                       "Event_Type" : "Arrival and in Queue"}
-        print("Event_info:\n", Event_info)
-        #Event_calendar.append(Event_info)
 
 def handle_departure_event():
-    
-    #setup_time = np.random.randint(25, 38)
-    #setup_times.append(setup_time)
-    
-    print("clock_now:", clock)
-    
-    # print("min_depart_time:", min(depart_time))
-    # print("min_setup_depart:", min(setup_depart))
-    
-    print("Entering_2")
     index = service_queue.pop(0)
-    print("service_queue:", service_queue)
-    print("index:", index)
     setup_index = setup_depart.index(min(setup_depart))
-    print("setup_index:", setup_index)
     depart_index = depart_time.index(min(depart_time))
-    print("depart_index:",depart_index)
     setup_depart[setup_index] = clock + setup_time[index]
     depart_time[depart_index] =  setup_depart[setup_index] + service_time[index]
-    print("This is setup_depart time:",setup_depart)
-    print("This is depart Time:",depart_time)
-    
     Event_info = {"Patient": "P"+str(index), "Event_time" : clock, 
                   "Event_Type" : "Service_Start", "Setup_finish" : setup_depart[setup_index],
                   "Departure" : depart_time[depart_index]}
-    print("Event_info:\n", Event_info)
-    Event_calendar.append(Event_info)
-    
-    
-    # U = np.random.uniform(0,1)
-    # print("U_value", U)
-    # if U > 0.5:
-    #     print("depart time as it is")
-    # else:
-    #     bisect.insort(arrival_times, depart_time[depart_index])
-    
-    #departures.append(depart_time)
-    
+    Event_calendar.append(Event_info)    
 
 clock =0
-#setup_times = []
 
-# print(arrival_times)
-while(clock<1000):
-    #print("clock:", clock)   
+while(clock<1000):   
     
     if(clock in arrival_times):
-        
         handle_arrival_event()
-        
-        
     if(clock>=min(depart_time) and clock >= min(setup_depart) and len(service_queue)!=0):
-         
         handle_departure_event()
-        
         
     clock+=1
     
-
 print("Full_Event_Calendar:\n" , Event_calendar)
 
-pd = pd.DataFrame(Event_calendar)
 pd["Arrival_times"] = arrival_times
+pd = pd.DataFrame(Event_calendar)
