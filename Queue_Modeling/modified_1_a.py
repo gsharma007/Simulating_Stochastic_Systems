@@ -3,23 +3,14 @@ import numpy as np
 import bisect
 
 NUM_PATIENTS = 10
-
 np.random.seed(0)
 
-# Inter_Arrivals = [5, 8, 30, 20, 60, 80, 70, 30, 20, 90, 50]
-# arrival_times = [np.sum(Inter_Arrivals[:n]) for n in range(1, len(Inter_Arrivals)+1)]
-
 setup_time = [25, 26, 28, 26, 27, 28, 27, 15, 16, 18, 17]
-# len(setup_time)
 
 Inter_Arrivals = np.random.randint(20, 50, size=NUM_PATIENTS)
 arrival_times = [np.sum(Inter_Arrivals[:n]) for n in range(1, len(Inter_Arrivals)+1)]
 
 service_time = np.random.randint(192,240, size=NUM_PATIENTS)
-
-
-# service_time = [180, 190, 185, 205, 170, 215, 220, 195, 200, 240, 225]
-# len(service_time)
 
 #Resource Count
 
