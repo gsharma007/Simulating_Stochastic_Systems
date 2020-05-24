@@ -60,37 +60,16 @@ for x in range(0,len(arrival_times)):
 
 
 while(clock<10000):
-    
-    # print("Clock:", clock)
+
     val = next((item for item in pat_data if item["Arrival_Time"] == clock), False)
-    # print("val:", val)
-    
-    # print("min_dpeart_time", min(depart_time))
-    # print("min_setup_time", min(setup_depart))
-    # print("len(service_queue)",len(service_queue))
     
     if(val!=False):
         
-        print("Entering_1\n")
-        
         if(clock >=min(depart_time) and clock >= min(setup_depart) and len(service_queue)==0):
-            
-            print("Clock:", clock)
-            
-            print("Entering_1_A\n")
-            
             setup_index = setup_depart.index(min(setup_depart))
-            print("setup_index:" , setup_index)
-            
             depart_index = depart_time.index(min(depart_time))
-            print("depart_index:" , depart_index)
-            
             setup_depart[setup_index] = clock + val["setup_time"]
-            print("setup_depart[setup_index]", setup_depart[setup_index])
-            
             depart_time[depart_index] =  setup_depart[setup_index] + val["service_time"]
-            print("depart_time[depart_index]", depart_time[depart_index])
-            
             status = bool(random.getrandbits(1))
             
             print("******************************")
@@ -111,8 +90,6 @@ while(clock<10000):
                           "Setup_finish" : setup_depart[setup_index],
                           "Departure" : depart_time[depart_index], "Test_Reseult": status}
             
-            print("Event_info:\n", Event_info)
-            
             Event_calendar.append(Event_info)
             results.append(Event_info)
             
@@ -121,9 +98,7 @@ while(clock<10000):
             if(status==False):
                 
                 print("Adding Rework into the Arrivals")
-                
                 new_arrival = depart_time[depart_index] + Test_time
-                
                 rework_dict = {}
                 
                 rework_dict["Pat_no"] = val["Pat_no"]
@@ -131,75 +106,39 @@ while(clock<10000):
                 rework_dict["service_time"] = val["service_time"]
                 rework_dict["setup_time"] = val["setup_time"]
                 
-                #val["Arrival_Time"] = depart_time[depart_index] + Test_time
-                
                 print("***************")
                 print("False Status")
                 # print("Arrival Value:", val["Arrival_Time"])
                 print("Arrival Value:", new_arrival)
                 print("****************")
-                
-                print("rework:", rework_dict)
-                
+
                 pat_data.append(rework_dict)
                 
-                print("pat_data_updated:", pat_data)
-                
         else:
-            
-            print("Clock:", clock)
-            
-            print("Entering 1_B\n")
+
             service_queue.append(val)
-            
-            print("service_queue:" , service_queue)
             
             Event_info = {"Patient": val["Pat_no"], 
                           "Arrival_time": val["Arrival_Time"],
                           "Event_time" : clock, 
                           "Event_Type" : "Arrival and in Queue"}
-            
-            print("Event_info:\n", Event_info)
-            
+
             Event_calendar.append(Event_info)
             
             queue_level = len(service_queue)
-            print("queue_level:", queue_level)
-        
             Queue_track.append(queue_level)
-            
-    
+
     if(clock>=min(depart_time) and clock >= min(setup_depart) and len(service_queue)!=0):
-    
-        
-        print("Clock:", clock)
-        print("Entering_2\n")
         
         val = service_queue.pop(0)
-        print("val_now:", val)
-        print("service_queue:", service_queue)
         
         queue_level = len(service_queue)
-        print("queue_level:", queue_level)
-    
         Queue_track.append(queue_level)
         
         setup_index = setup_depart.index(min(setup_depart))
-        print("setup_index:" , setup_index)
-        
         depart_index = depart_time.index(min(depart_time))
-        print("depart_index:" , depart_index)
-        
         setup_depart[setup_index] = clock +  val["setup_time"]
-        print("setup_depart[setup_index]", setup_depart[setup_index])
-
         depart_time[depart_index] =  setup_depart[setup_index] + val["service_time"]
-        print("depart_time[depart_index]", depart_time[depart_index])
-        
-        # val["setup_depart"] = setup_depart[setup_index]
-        # val["depart_time"] = depart_time[depart_index]
-        
-        # print("changed_val:", val)
         
         status = bool(random.getrandbits(1))
         print("******************************")
@@ -218,7 +157,6 @@ while(clock<10000):
                       "Service_time": val["service_time"],
                       "Setup_finish" : setup_depart[setup_index],
                       "Departure" : depart_time[depart_index], "Test_Reseult": status}
-        print("Event_info:\n", Event_info)
         
         Event_calendar.append(Event_info)
         results.append(Event_info)
@@ -228,15 +166,12 @@ while(clock<10000):
             print("Adding Rework into the Arrivals")
             
             new_arrival = depart_time[depart_index] + Test_time
-                
             rework_dict = {}
             
             rework_dict["Pat_no"] = val["Pat_no"]
             rework_dict["Arrival_Time"] = new_arrival
             rework_dict["service_time"] = val["service_time"]
             rework_dict["setup_time"] = val["setup_time"]
-            
-            # val["Arrival_Time"] = depart_time[depart_index] + Test_time
             
             print("***************")
             print("False Status")
@@ -245,8 +180,6 @@ while(clock<10000):
             print("****************")
             
             pat_data.append(rework_dict)
-            
-            print("pat_data_updated:", pat_data)
 
     clock+=1
     
@@ -261,12 +194,7 @@ Event_calendar['queue'] = Queue_track
 Patient_Data = pd.DataFrame(pat_data)
 
 df = pd.DataFrame(results)
-# df["arrival_times"] = Patient_Data["Arrival_Time"]
-#df.insert(1, 'arrival_times', Patient_Data["Arrival_time"])
-# df.insert(4, 'setup_times', setup_time)
-# df.insert(6, 'service_time', service_time)
 df["waiting_time"]= df["Event_time"]-df["Arrival_time"]
-# #df["Arrival_times"] = arrival_times
 
 """System Visualization"""
 
