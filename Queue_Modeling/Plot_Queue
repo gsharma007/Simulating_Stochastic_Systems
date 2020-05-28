@@ -1,0 +1,35 @@
+plt.figure()
+ax = plt.gca()
+Event_calendar.plot(x='Event_time', y='queue', linestyle='-', drawstyle='steps', ax=ax)
+Event_calendar.plot(x='Event_time', y='Num_in_Service',kind='area', linestyle='-', color ='pink', ax=ax)
+Event_calendar.plot(x='Event_time', y='OP_state', kind='area', linestyle='-', style='y', ax=ax)
+Event_calendar.plot(x='Event_time', y='MC_state', kind='area', linestyle='-', ax=ax)
+plt.show(block= True)
+
+
+plt.figure()
+Event_calendar.plot(x='Event_time', y='OP_state', kind='area', linestyle='-', style='y')
+plt.show()
+
+plt.figure()
+Event_calendar.plot(x='Event_time', y='MC_state', kind='area', linestyle='-')
+plt.show()
+
+plt.figure()
+waiting_time_dist = Event_calendar.plot(x='Event_time', y='Waiting_time', 
+                                kind= 'area', subplots = True)
+plt.show()
+
+
+"""System Statistics"""
+
+#Average Queue Level = sum(Queue_Level)/No. of times in queue
+average_queue_level = sum(Queue_track)/len(Queue_track)
+print("average_queue_level :", average_queue_level)
+
+#Average waiting time in queue = Total of times in queue/No. of times in queue
+# avg_wait_time_in_queue = sum(df['Waiting_time'])/np.count_nonzero(Queue_track)
+# print("avg_wait_time_in_queue", avg_wait_time_in_queue)
+
+avg_wait_time_in_queue = sum(Event_calendar['Waiting_time'])/np.count_nonzero(Queue_track)
+print("avg_wait_time_in_queue", avg_wait_time_in_queue)
