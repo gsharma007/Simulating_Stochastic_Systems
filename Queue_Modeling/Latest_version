@@ -491,9 +491,11 @@ while(clock<10000):
 print("Full_Event_Calendar:\n" , Event_calendar)
 Event_calendar = pd.DataFrame(Event_calendar)
 Event_calendar['queue'] = Queue_track
-
-Event_calendar["OP_state"] = sum("Operator_State")
-Event_calendar["MC_state"] = sum("Machine_State")
+Event_calendar["op_1_state"] = Event_calendar["Operator_State"].str[0]
+Event_calendar["op_2_state"] = Event_calendar["Operator_State"].str[1]
+Event_calendar["mc_1_state"] = Event_calendar["Machine_State"].str[0]
+Event_calendar["mc_2_state"] = Event_calendar["Machine_State"].str[1]
+Event_calendar["mc_3_state"] = Event_calendar["Machine_State"].str[2]
 #Event_calendar["B(t)"] = B_t
 
 Patient_Data = pd.DataFrame(pat_data)
@@ -521,8 +523,7 @@ plt.figure()
 ax = plt.gca()
 Event_calendar.plot(x='Event_time', y='queue', linestyle='-', drawstyle='steps', ax=ax)
 Event_calendar.plot(x='Event_time', y='Num_in_Service',kind='area', linestyle='-', color ='pink', ax=ax)
-Event_calendar.plot(x='Event_time', y='OP_state', kind='area', linestyle='-', style='y', ax=ax)
-Event_calendar.plot(x='Event_time', y='MC_state', kind='area', linestyle='-', ax=ax)
+Event_calendar.plot(x='Event_time', y='op_1_state', kind='area', linestyle='-', style='y', ax=ax)
 plt.show(block= False)
 
 
