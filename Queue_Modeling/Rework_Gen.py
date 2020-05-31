@@ -185,6 +185,8 @@ departures = []
 service_queue = []
 Queue_track = []
 results = []
+rework_df = []
+rework_check = []
 
 queue_level = 0
 num_in_service = 0
@@ -299,6 +301,9 @@ while(clock<10000):
         
         #Calling_Population = NUM_PATIENTS - num_in_system - num_completed
         
+        
+        
+        
         Event_info = {#"Patient": val["Pat_no"], 
               "Event_time" : clock, 
               "Event_Type" : "Departure",
@@ -385,14 +390,16 @@ while(clock<10000):
             
             MC_bt = (np.count_nonzero(machine_state)/len(machine_state))*100
             
-            if clock == min(depart_time):
-                num_in_service -= 1
-                num_in_system -= 1
-                num_completed -= 1
+# =============================================================================
+#             if clock == min(depart_time):
+#                 num_in_service -= 1
+#                 num_in_system -= 1
+#                 num_completed -= 1
+# =============================================================================
                 
-            else:
-                num_in_service += 1
-                num_in_system += 1
+            #else:
+            num_in_service += 1
+            num_in_system += 1
             
             if val["is_rework"] in ("Yes"):
                 num_in_rework += 1
@@ -422,6 +429,8 @@ while(clock<10000):
                 rework_dict["service_time"] = val["service_time"]
                 rework_dict["setup_time"] = val["setup_time"]
                 rework_dict["is_rework"] = "Yes"
+                
+                rework_df.append(rework_dict)
                 
                 #val["Arrival_Time"] = depart_time[depart_index] + Test_time
                 
@@ -601,8 +610,17 @@ while(clock<10000):
         print("Test Status: ",Test_Result)
         print("*******************************")
         
-        if val["is_rework"] in ("Yes"):
-                num_in_rework -= 1
+# =============================================================================
+#         if (val["is_rework"] in ("Yes")):
+#             rework_df[0]["Departure"] = depart_time[depart_index]
+#         
+#         for item in rework_df: 
+#             rework_check.append(item["Departure"])
+#         
+#         if (clock in rework_check):
+#             num_in_rework -= 1
+# =============================================================================
+            
         
         if Test_Result in ("Sample Rejected","Rejected in LF and HF Both"):
             
@@ -619,6 +637,8 @@ while(clock<10000):
             rework_dict["service_time"] = val["service_time"]
             rework_dict["setup_time"] = val["setup_time"]
             rework_dict["is_rework"] = "Yes"
+            
+            rework_df.append(rework_dict)
             
             # val["Arrival_Time"] = depart_time[depart_index] + Test_time
             
@@ -665,7 +685,7 @@ while(clock<10000):
 
 """Storing Results"""
 
-print("Full_Event_Calendar:\n" , Event_calendar)
+#print("Full_Event_Calendar:\n" , Event_calendar)
 Event_calendar = pd.DataFrame(Event_calendar)
 Event_calendar['queue'] = Queue_track
 
