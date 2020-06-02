@@ -6,10 +6,17 @@ import matplotlib.pyplot as plt
 
 NUM_PATIENTS = 50
 
-np.random.seed(20)
+#np.random.seed(60)
 
 
 """Testing"""
+
+# =============================================================================
+# patients_target_bc = [1, 2, 3, 4, 5, 6, 7, 8, 9, 10] 
+#                       #11, 12, 13, 14, 15, 16, 17, 18, 19, 20, 21, 22, 23, 24, 25, 26, 27, 28, 29, 30, 31, 32, 33, 34 ,35, 36, 37, 38, 39, 40, 41, 42, 43, 44, 45, 46, 47, 48, 49, 50]
+# yield_selected_mfg = [2, 3, 4, 5, 6, 7, 8, 9, 10, 11]
+#                       #13, 14, 15, 16, 17, 18, 19, 20, 21, 22, 23, 24, 25, 26, 27, 28, 29, 30, 31, 32, 33, 34, 35, 36, 37, 38, 39, 40, 41, 42, 43, 44, 45, 46, 47, 48, 49, 50, 51]
+# =============================================================================
 
 #inputs
 patients_target_bc = [1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15, 16, 17, 18, 19, 20, 21, 22, 23, 24, 25, 26, 27, 28, 29, 30, 31, 32, 33, 34 ,35, 36, 37, 38, 39, 40, 41, 42, 43, 44, 45, 46, 47, 48, 49, 50]
@@ -152,6 +159,7 @@ def quality_policy(QM_Policy_MFG, yield_selected_mfg,patients_target_bc, val):
 """Resource allocation and Rework"""
 
 Inter_Arrivals = np.random.uniform(20, 50, size=NUM_PATIENTS)
+#Inter_Arrivals = np.random.uniform(0, 0, size=NUM_PATIENTS)
 
 arrival_times = [np.sum(Inter_Arrivals[:n]) for n in range(1, len(Inter_Arrivals)+1)]
 arrival_times = np.around(arrival_times)
@@ -164,8 +172,8 @@ setup_time = np.around(setup_time)
 
 #Resource Count
 
-Num_Operators = 3
-Num_Machines = 5
+Num_Operators = 13
+Num_Machines = 9
 
 #Initialization
 clock =0
@@ -180,6 +188,8 @@ results = []
 rework_df = []
 rework_check = []
 rework_end_time = []
+new_list_dept_check = []
+not_complete_times = []
 
 queue_level = 0
 num_in_service = 0
@@ -231,10 +241,22 @@ while(clock<10000):
         
         num_in_system -= 1
         num_in_service -= 1
-        num_completed += 1
+        #num_completed += 1
         
         if (clock in rework_end_time):
             num_in_rework -= 1
+        
+        if (clock in rework_end_time):
+            print("yyyyyyyyyyyyyyyyyyyyy")
+            re_val = next((item for item in new_list_dept_check if item["Departure"] == clock))
+            if re_val["Test_Result"] not in ("Sample Rejected","Rejected in LF and HF Both"):
+                num_completed += 1
+        if clock not in not_complete_times and clock not in rework_end_time:
+            print("zzzzzzzzzzzzzzzzzzzzz")
+            num_completed += 1
+                      
+        #if (clock in rework_end_time):
+            
         
         depart_index = depart_time.index(clock)
         depart_time[depart_index] = 0
@@ -376,17 +398,22 @@ while(clock<10000):
             num_in_service += 1
             num_in_system += 1
             
+            #status = bool(random.getrandbits(1))
+            Test_Result = quality_policy(1, yield_selected_mfg, patients_target_bc, val)
+            
             if val["is_rework"] in ("Yes"):
                 num_in_rework += 1
                 
             if (val["is_rework"] in ("Yes")):
                 rework_end_time.append(depart_time[depart_index])
+                dict_check = {}
+                dict_check = val
+                dict_check["Departure"] = depart_time[depart_index]
+                dict_check["Test_Result"] = Test_Result
+                new_list_dept_check.append(dict_check)
             
             if (clock in rework_end_time):
                 num_in_rework -= 1
-            
-            #status = bool(random.getrandbits(1))
-            Test_Result = quality_policy(1, yield_selected_mfg, patients_target_bc, val)
             
             print("******************************")
             print("Setup Depart Time Array: ", setup_depart)
@@ -398,6 +425,42 @@ while(clock<10000):
             Calling_Population = (NUM_PATIENTS - num_in_system - num_completed)
             
             #pat_data["Departure"] = depart_time[depart_index]
+            
+            if Test_Result in ("Sample Rejected","Rejected in LF and HF Both"):
+                
+                print("Adding Rework into the Arrivals")
+                
+                #num_completed -= 1
+                
+                new_arrival = depart_time[depart_index] + Test_time
+                
+                not_complete_times.append(depart_time[depart_index])
+                
+                rework_dict = {}
+                
+                rework_dict["Pat_no"] = val["Pat_no"]
+                rework_dict["Arrival_Time"] = new_arrival
+                rework_dict["service_time"] = val["service_time"]
+                rework_dict["setup_time"] = val["setup_time"]
+                #rework_dict["Departure"] = depart_time[depart_index]
+                rework_dict["is_rework"] = "Yes"
+                
+                rework_df.append(rework_dict)
+            
+                
+                #val["Arrival_Time"] = depart_time[depart_index] + Test_time
+                
+                print("***************")
+                print("False Status")
+                # print("Arrival Value:", val["Arrival_Time"])
+                print("Arrival Value:", new_arrival)
+                print("****************")
+                
+                print("rework:", rework_dict)
+                
+                pat_data.append(rework_dict)
+                
+                print("pat_data_updated:", pat_data)
             
             Event_info = {"Patient": val["Pat_no"], 
                           "Arrival_time": val["Arrival_Time"],
@@ -553,7 +616,9 @@ while(clock<10000):
         MC_bt_count = np.count_nonzero(machine_state)
 
         num_in_system -= 1
-        num_completed += 1
+        
+        if clock not in not_complete_times:
+            num_completed += 1
         
         
         Test_Result = quality_policy(1, yield_selected_mfg, patients_target_bc, val)
@@ -567,6 +632,11 @@ while(clock<10000):
         
         if (val["is_rework"] in ("Yes")):
             rework_end_time.append(depart_time[depart_index])
+            dict_check = {}
+            dict_check = val
+            dict_check["Departure"] = depart_time[depart_index]
+            dict_check["Test_Result"] = Test_Result
+            new_list_dept_check.append(dict_check)
             
         if (clock in rework_end_time):
             num_in_rework -= 1
@@ -576,9 +646,10 @@ while(clock<10000):
             
             print("Adding Rework into the Arrivals")
             
-            num_completed -= 1
+            #num_completed -= 1
             
             new_arrival = depart_time[depart_index] + Test_time
+            not_complete_times.append(depart_time[depart_index])
                 
             rework_dict = {}
             
@@ -648,113 +719,70 @@ while(clock<10000):
 Event_calendar = pd.DataFrame(Event_calendar)
 Event_calendar['queue'] = Queue_track
 
-# Event_calendar["OP_state"] = sum(Event_calendar["Operator_State"])
-# Event_calendar["MC_state"] = sum(Event_calendar["Machine_State"])
-#Event_calendar["B(t)"] = B_t
-
 Patient_Data = pd.DataFrame(pat_data)
 
 df = pd.DataFrame(results)
-# df["arrival_times"] = Patient_Data["Arrival_Time"]
-#df.insert(1, 'arrival_times', Patient_Data["Arrival_time"])
-# df.insert(4, 'setup_times', setup_time)
-# df.insert(6, 'service_time', service_time)
-#df["waiting_time"]= df["Event_time"]-df["Arrival_time"]
-# #df["Arrival_times"] = arrival_times
 
 """System Visualization"""
 
-#plt.figure()
-# =============================================================================
-# Event_calendar.plot(x='Event_time', y=['queue','Num_in_Service'], 
-#                     kind='area', stacked=False, 
-#                     grid=True, style=['+-','o-'])
-# =============================================================================
-#Event_calendar.plot(x='Event_time', y='Num_in_Service', style='.-', kind='area', stacked=False)
-#plt.show(block= True)
-
-# =============================================================================
-# plt.figure()
-# ax = plt.gca()
-# Event_calendar.plot(x='Event_time', y='queue', linestyle='-', drawstyle='steps', stacked=True, label="% in Queue", ax=ax)
-# Event_calendar.plot(x='Event_time', y='Calling_Population',kind='area', linestyle='-', stacked=True, label="% in Process", color ='pink', ax=ax)
-# Event_calendar.plot(x='Event_time', y='Num_in_Rework',kind='area', linestyle='-', stacked=True, label="% in Rework", ax=ax)
-# Event_calendar.plot(x='Event_time', y='Num_in_System',kind='area', linestyle='-', stacked=True, label="% in System", ax=ax)
-# Event_calendar.plot(x='Event_time', y='Num_Completed',kind='area', linestyle='-', stacked=True, label="% Completed", ax=ax)
-# #Event_calendar.plot(x='Event_time', y='OP_state', kind='area', linestyle='-', style='y', label="Operator State", ax=ax)
-# #Event_calendar.plot(x='Event_time', y='MC_state', kind='area', linestyle='-', label="Machine State", ax=ax)
-# plt.show(block= True)
-# =============================================================================
-
+#State Tracking 
 plt.figure()
 Event_calendar.plot(x='Event_time', y=['queue','Calling_Population', 'Num_in_Rework', 'Num_in_Service', 'Num_Completed'], 
                      kind='area', stacked=True, label = ['parts_in_queue','calling_population', 'parts_in_rework', 'parts_in_service', 'parts_completed'],
                      grid=True)
 plt.show()
 
+#State Tracking without Calling Population
 plt.figure()
-Event_calendar.plot(x='Event_time', y=['queue', 'Calling_Population', 'Num_in_Rework', 'Num_Completed'], 
-                     kind='area', stacked=True, 
+Event_calendar.plot(x='Event_time', y=['queue', 'Num_in_Service', 'Num_in_Rework', 'Num_Completed'], 
+                     kind='area', stacked=True, label = ['parts_in_queue','parts_in_service', 'parts_in_rework', 'parts_completed'],
                      grid=True)
 plt.show()
 
+#Rework
 plt.figure()
-Event_calendar.plot(x='Event_time', y=['queue', 'Calling_Population', 'Num_in_Rework'], 
-                     kind='area', stacked=True, 
-                     grid=True)
+Event_calendar.plot(x='Event_time', y='Num_in_Rework', linestyle='-', drawstyle='steps')
 plt.show()
 
-
+#Queue_Behavior
 plt.figure()
 Event_calendar.plot(x='Event_time', y='queue', linestyle='-', drawstyle='steps')
 plt.show()
 
+#Num_in_System
 plt.figure()
-waiting_time_dist = Event_calendar.plot(x='Event_time', y='Waiting_time', 
-                                kind= 'area', subplots = True)
+num_in_sys_dist = Event_calendar.plot(x='Event_time', y='Num_in_System', linestyle='-', drawstyle='steps')
 plt.show()
 
-
+#Num_in_Service
 plt.figure()
-num_in_sys_dist = Event_calendar.plot(x='Event_time', y='Num_in_System')
+num_in_sys_dist = Event_calendar.plot(x='Event_time', y='Num_in_Service', linestyle='-', drawstyle='steps')
 plt.show()
 
+#Waiting_time
 plt.figure()
-Event_calendar.plot(x='Event_time', y='OP_B(t)', kind='line', linestyle='-', label = 'OP_B(t)')
+waiting_time_dist = Event_calendar.plot(x='Event_time', y='Waiting_time', kind= 'area', subplots = True)
 plt.show()
 
+#Operator_utilization_%ge
 plt.figure()
-Event_calendar.plot(x='Event_time', y='MC_B(t)', kind='line', linestyle='-', label = 'MC_B(t)')
+Event_calendar.plot(x='Event_time', y='OP_B(t)', kind='line', linestyle='-', label = 'OP_B(t)',drawstyle='steps')
 plt.show()
 
+#Operator_utilization_count
+plt.figure()
+Event_calendar.plot(x='Event_time', y='OP_state_count', kind='line', linestyle='-', label = 'OP_B(t)_count',drawstyle='steps')
+plt.show()
 
-# =============================================================================
-# Event_calendar["op_1_state"] = Event_calendar["Operator_State"].str[0]
-# Event_calendar["op_2_state"] = Event_calendar["Operator_State"].str[1]
-# Event_calendar["mc_1_state"] = Event_calendar["Machine_State"].str[0]
-# Event_calendar["mc_2_state"] = Event_calendar["Machine_State"].str[1]
-# Event_calendar["mc_3_state"] = Event_calendar["Machine_State"].str[2]
-# 
-# plt.figure()
-# op1_state = Event_calendar.plot(x='Event_time', y='op_1_state', kind= 'line')
-# plt.show()
-# 
-# plt.figure()
-# op2_state = Event_calendar.plot(x='Event_time', y='op_2_state', kind= 'line')
-# plt.show()
-# 
-# plt.figure()
-# mc_1_state = Event_calendar.plot(x='Event_time', y='mc_1_state', kind= 'line')
-# plt.show()
-# 
-# plt.figure()
-# mc_2_state = Event_calendar.plot(x='Event_time', y='mc_2_state', kind= 'line')
-# plt.show()
-# 
-# plt.figure()
-# mc_3_state = Event_calendar.plot(x='Event_time', y='mc_3_state', kind= 'line')
-# plt.show()
-# =============================================================================
+#Machine_utilization_%ge
+plt.figure()
+Event_calendar.plot(x='Event_time', y='MC_B(t)', kind='line', linestyle='-', label = 'MC_B(t)', drawstyle='steps')
+plt.show()
+
+#Machine_utilization_count
+plt.figure()
+Event_calendar.plot(x='Event_time', y='MC_state_count', kind='line', linestyle='-', label = 'MC_B(t)_count', drawstyle='steps')
+plt.show()
 
 
 """System Statistics"""
